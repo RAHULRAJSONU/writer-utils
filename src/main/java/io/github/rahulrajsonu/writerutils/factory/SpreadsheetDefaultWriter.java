@@ -9,7 +9,6 @@ import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.CreationHelper;
 import org.apache.poi.ss.usermodel.DataFormat;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.HorizontalAlignment;
@@ -27,15 +26,14 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public class SpreadsheetWriter implements Writer {
+public class SpreadsheetDefaultWriter implements Writer {
 
-    private static final Logger logger = LoggerFactory.getLogger(SpreadsheetWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(SpreadsheetDefaultWriter.class);
     @Override
     public <T> byte[] write(List<T> data, Class<T> clazz, String sheetName) {
 
@@ -52,7 +50,7 @@ public class SpreadsheetWriter implements Writer {
             Sheet sheet = workbook.createSheet(sheetName);
 
             // get the metadata for each field of the POJO class into a list
-            List<XlsxField> xlsColumnFields = getFieldNamesForClass(clazz);
+            List<XlsxField> xlsColumnFields = getClassMetadata(clazz);
             String[] columnTitles = xlsColumnFields.stream().map(XlsxField::getColumnHeader).toArray(String[]::new);
             int tempRowNo = 0;
             int recordBeginRowNo = 0;
@@ -154,7 +152,7 @@ public class SpreadsheetWriter implements Writer {
                         for (Object objectValue : objValueList) {
 
                             Row childRow;
-                            List<XlsxField> xlsCompositeColumnFields = getFieldNamesForClass(objectValue.getClass());
+                            List<XlsxField> xlsCompositeColumnFields = getClassMetadata(objectValue.getClass());
 
                             if (isFirstRow) {
                                 childRow = mainRow;
@@ -264,10 +262,6 @@ public class SpreadsheetWriter implements Writer {
                               CellStyle genericStyle, Workbook workbook) {
 
         Hyperlink link = workbook.getCreationHelper().createHyperlink(HyperlinkType.URL);
-        CreationHelper createHelper = workbook.getCreationHelper();
-        CellStyle dateCellStyle = workbook.createCellStyle();
-        dateCellStyle.setDataFormat(
-                createHelper.createDataFormat().getFormat("yyyy/MM/dd"));
 
         if (objValue != null) {
             if (objValue instanceof String) {
@@ -295,15 +289,11 @@ public class SpreadsheetWriter implements Writer {
                 } else {
                     cell.setCellValue(0);
                 }
-            } else if(objValue instanceof Date){
-                Date date = (Date)objValue;
-                cell.setCellValue(date);
-                cell.setCellStyle(dateCellStyle);
             }
         }
     }
 
-    private static List<XlsxField> getFieldNamesForClass(Class<?> clazz) {
+    private static List<XlsxField> getClassMetadata(Class<?> clazz) {
         List<XlsxField> xlsColumnFields = new ArrayList<>();
         Field[] fields = clazz.getDeclaredFields();
         XlsxSheet xlsxSheet = clazz.getAnnotation(XlsxSheet.class);
@@ -335,7 +325,7 @@ public class SpreadsheetWriter implements Writer {
                 xlsColumnField.setFieldName(field.getName());
                 xlsColumnFields.add(xlsColumnField);
             }
-        }else {
+        } else {
             int columnIndex = 0;
             for (Field field : fields) {
                 XlsxField xlsColumnField = new XlsxField();

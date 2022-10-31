@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.util.List;
 
 @Getter
@@ -26,11 +27,13 @@ public class XlsxUser implements Exportable{
     private Integer age;
     @XlsxSingleField(columnIndex = 3, columnHeader = "BMI_VALUE")
     private Double bmiValue;
-    @XlsxSingleField(columnIndex = 4, columnHeader = "IS_OVER_WEIGHT")
+    @XlsxSingleField(columnIndex = 4, columnHeader = "DOB")
+    private Date dob;
+    @XlsxSingleField(columnIndex = 5, columnHeader = "IS_OVER_WEIGHT")
     private Boolean isOverweight;
-    @XlsxSingleField(columnIndex = 5, columnHeader = "ACTIVITIES")
+    @XlsxSingleField(columnIndex = 6, columnHeader = "ACTIVITIES")
     private List<String> activities;
-    @XlsxCompositeField(from = 6, to = 7)
+    @XlsxCompositeField(from = 7, to = 8)
     private List<XlsxDietPlan> plans;
 
     @Getter
@@ -38,9 +41,9 @@ public class XlsxUser implements Exportable{
     @NoArgsConstructor
     @Setter
     public static class XlsxDietPlan implements Exportable {
-        @XlsxSingleField(columnIndex = 6, columnHeader = "MEAL_NAME")
+        @XlsxSingleField(columnIndex = 7, columnHeader = "MEAL_NAME")
         private String mealName;
-        @XlsxSingleField(columnIndex = 7, columnHeader = "CALORIES")
+        @XlsxSingleField(columnIndex = 8, columnHeader = "CALORIES")
         private Double calories;
     }
 
