@@ -3,7 +3,6 @@ package io.github.rahulrajsonu.writerutils.factory;
 import io.github.rahulrajsonu.writerutils.annotation.XlsxCompositeField;
 import io.github.rahulrajsonu.writerutils.annotation.XlsxSheet;
 import io.github.rahulrajsonu.writerutils.annotation.XlsxSingleField;
-import io.github.rahulrajsonu.writerutils.service.Exportable;
 import io.github.rahulrajsonu.writerutils.service.Writer;
 import org.apache.poi.common.usermodel.HyperlinkType;
 import org.apache.poi.ss.usermodel.BorderStyle;
@@ -37,9 +36,11 @@ public class SpreadsheetWriter implements Writer {
 
     private static final Logger logger = LoggerFactory.getLogger(SpreadsheetWriter.class);
     @Override
-    public <T> byte[] write(List<T> data, Class<T> clazz, String sheetName) {
+    public <T> byte[] write(List<T> data, String sheetName) {
 
         long start = System.currentTimeMillis();
+
+        Class<?> clazz = data.get(0).getClass();
 
         try (XSSFWorkbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream();){
             // setting up the basic styles for the workbook
